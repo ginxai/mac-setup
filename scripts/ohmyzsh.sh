@@ -5,6 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/utils.sh"
 
 ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+ZSHRC="$HOME/.zshrc"
 
 # ── Oh My Zsh ─────────────────────────────────────────────────────────────────
 if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
@@ -15,10 +16,10 @@ else
   log_success "Oh My Zsh already installed"
 fi
 
-# ── Powerlevel10k theme ───────────────────────────────────────────────────────
+# ── Powerlevel10k ─────────────────────────────────────────────────────────────
 P10K_DIR="$ZSH_CUSTOM/themes/powerlevel10k"
 if [[ ! -d "$P10K_DIR" ]]; then
-  log_info "Installing Powerlevel10k theme..."
+  log_info "Installing Powerlevel10k..."
   git clone --depth=1 --quiet https://github.com/romkatv/powerlevel10k.git "$P10K_DIR"
   log_success "Powerlevel10k installed"
 else
@@ -45,22 +46,61 @@ else
   log_success "zsh-syntax-highlighting already installed"
 fi
 
-# ── Configure .zshrc ──────────────────────────────────────────────────────────
-ZSHRC="$HOME/.zshrc"
+# ── MesloLGS Nerd Font (required for p10k icons) ─────────────────────────────
+if ! brew list --cask font-meslo-lg-nerd-font &>/dev/null 2>&1; then
+  log_info "Installing MesloLGS Nerd Font..."
+  brew install --cask font-meslo-lg-nerd-font
+  log_success "MesloLGS Nerd Font installed"
+else
+  log_success "MesloLGS Nerd Font already installed"
+fi
 
-# Set theme to powerlevel10k
+# ── Apply p10k lean config (no wizard) ────────────────────────────────────────
+P10K_CONFIG="$HOME/.p10k.zsh"
+P10K_LEAN="$P10K_DIR/config/p10k-lean.zsh"
+if [[ ! -f "$P10K_CONFIG" ]]; then
+  if [[ -f "$P10K_LEAN" ]]; then
+    cp "$P10K_LEAN" "$P10K_CONFIG"
+    log_success "Powerlevel10k: lean style applied"
+  fi
+else
+  log_success "p10k config already exists"
+fi
+
+# ── Configure .zshrc ──────────────────────────────────────────────────────────
+# Theme
 if grep -q 'ZSH_THEME=' "$ZSHRC" 2>/dev/null; then
   sed -i '' 's|ZSH_THEME=.*|ZSH_THEME="powerlevel10k/powerlevel10k"|' "$ZSHRC"
 else
   echo 'ZSH_THEME="powerlevel10k/powerlevel10k"' >> "$ZSHRC"
 fi
 
-# Set plugins
+# Plugins
 if grep -q '^plugins=' "$ZSHRC" 2>/dev/null; then
   sed -i '' 's|^plugins=.*|plugins=(git zsh-autosuggestions zsh-syntax-highlighting)|' "$ZSHRC"
 else
   echo 'plugins=(git zsh-autosuggestions zsh-syntax-highlighting)' >> "$ZSHRC"
 fi
 
-log_success "Oh My Zsh configured: Powerlevel10k + autosuggestions + syntax highlighting"
-log_info "Open a new terminal then run: p10k configure"
+# Source p10k config at end of .zshrc
+if ! grep -q 'p10k.zsh' "$ZSHRC" 2>/dev/null; then
+  printf '\n# Powerlevel10k\n[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh\n' >> "$ZSHRC"
+fi
+
+# ── Auto-set iTerm2 font ──────────────────────────────────────────────────────
+ITERM_PLIST="$HOME/Library/Preferences/com.googlecode.iterm2.plist"
+if [[ -f "$ITERM_PLIST" ]]; then
+  # Quit iTerm2 first so plist changes aren't overwritten
+  osascript -e 'tell application "iTerm2" to quit' 2>/dev/null || true
+  sleep 1
+  /usr/libexec/PlistBuddy \
+    -c "Set 'New Bookmarks':0:'Normal Font' 'MesloLGSNFRegular 14'" \
+    -c "Set 'New Bookmarks':0:'Non Ascii Font' 'MesloLGSNFRegular 14'" \
+    -c "Set 'New Bookmarks':0:'Use Non-ASCII Font' true" \
+    "$ITERM_PLIST" 2>/dev/null \
+    && log_success "iTerm2 font set to MesloLGS NF 14" \
+    || log_info "Set iTerm2 font manually: Preferences → Profiles → Text → MesloLGS NF"
+fi
+
+log_success "Shell ready: Powerlevel10k (lean) + autosuggestions + syntax highlighting"
+log_info "Open a new terminal to see the new prompt ✨"
