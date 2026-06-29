@@ -7,7 +7,7 @@ source "$SCRIPT_DIR/lib/utils.sh"
 
 print_header "🍎  ginx macOS Setup"
 
-# ── Homebrew ──────────────────────────────────────────────────────────────────
+# ── Homebrew (required before gum/everything else) ────────────────────────────
 ensure_brew
 
 # ── gum (interactive TUI) ─────────────────────────────────────────────────────
@@ -18,6 +18,7 @@ fi
 
 # ── Tool definitions: "script_id:Display Name" ────────────────────────────────
 TOOLS=(
+  "homebrew:Homebrew"
   "claude_code:Claude Code"
   "nodejs:Node.js"
   "ohmyzsh:Oh My Zsh"
