@@ -14,16 +14,23 @@ Interactive CLI to set up a macOS development environment with one command.
 
 ## Requirements
 
-- macOS 12 or later
+- macOS 12 or later (Apple Silicon & Intel)
 - Internet connection
-- Homebrew — automatically installed if not already present
+- Everything else is installed automatically
 
 ## Quick Start
 
+**One-liner (recommended)** — works on a brand-new Mac, no git required:
+
 ```bash
-git clone git@gitlab.com:ginx-internal/infra/ginx-setup-macos.git
+/bin/bash -c "$(curl -fsSL https://YOUR_DOMAIN/setup.sh)"
+```
+
+**Manual (if you already have git):**
+
+```bash
+git clone https://gitlab.com/ginx-internal/infra/ginx-setup-macos.git
 cd ginx-setup-macos
-chmod +x install.sh
 ./install.sh
 ```
 

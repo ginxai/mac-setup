@@ -20,12 +20,14 @@ ensure_brew() {
   if ! command -v brew &>/dev/null; then
     log_info "Installing Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    # Add brew to PATH for Apple Silicon
+    # Add brew to PATH — Apple Silicon (/opt/homebrew) or Intel (/usr/local)
     if [[ -f /opt/homebrew/bin/brew ]]; then
       eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [[ -f /usr/local/bin/brew ]]; then
+      eval "$(/usr/local/bin/brew shellenv)"
     fi
   else
-    log_success "Homebrew already installed"
+    log_success "Homebrew already installed ($(brew --version | head -1))"
   fi
 }
 
