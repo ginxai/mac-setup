@@ -43,7 +43,7 @@ SELECTED=$(printf '%s\n' "${LABELS[@]}" | gum choose \
   --selected="$(IFS=,; echo "${LABELS[*]}")" \
   --header "  Select tools to install  (Space = toggle · Enter = confirm)" \
   --cursor.foreground="212" \
-  --selected.foreground="212")
+  --selected.foreground="212") || true
 
 if [[ -z "$SELECTED" ]]; then
   log_warn "No tools selected. Exiting."

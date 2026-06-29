@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/utils.sh
-source "$SCRIPT_DIR/lib/utils.sh"
+source "$SCRIPT_DIR/../lib/utils.sh"
 
 if command -v node &>/dev/null; then
   NODE_VERSION="$(node --version)"
