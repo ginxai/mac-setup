@@ -1,32 +1,92 @@
 # ginx-setup-macos
 
-Interactive CLI to set up a macOS development environment with one command.
+Cài đặt toàn bộ môi trường dev macOS bằng một lệnh duy nhất — có giao diện checkbox để chọn công cụ, mặc định chọn tất cả.
 
 ![Platform](https://img.shields.io/badge/platform-macOS%2012%2B-lightgrey)
-![License](https://img.shields.io/badge/license-MIT-blue)
+![Arch](https://img.shields.io/badge/arch-Apple%20Silicon%20%7C%20Intel-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## Features
+---
 
-- Interactive checkbox UI — select only the tools you want to install
-- All tools are pre-selected by default for a full setup experience
-- Powered by [gum](https://github.com/charmbracelet/gum) for a clean terminal interface
-- Installs tools via Homebrew, Homebrew Cask, npm, or curl depending on the tool
-
-## Requirements
-
-- macOS 12 or later (Apple Silicon & Intel)
-- Internet connection
-- Everything else is installed automatically
-
-## Quick Start
-
-**One-liner (recommended)** — works on a brand-new Mac, no git required:
+## Chạy nhanh (không cần cài gì trước)
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://YOUR_DOMAIN/setup.sh)"
 ```
 
-**Manual (if you already have git):**
+Script tự động xử lý mọi thứ từ đầu: Xcode CLT → Homebrew → clone repo → chạy installer.
+
+---
+
+## Cách hoạt động
+
+```
+curl setup.sh
+     │
+     ▼
+┌─────────────────────────────────────┐
+│  1. Kiểm tra macOS                  │
+│  2. Cài Xcode Command Line Tools    │  ← cần cho git/curl
+│  3. Cài Homebrew                    │  ← package manager
+│  4. Clone repo về ~/.ginx-setup-macos│
+│  5. Chạy install.sh                 │
+└─────────────────────────────────────┘
+     │
+     ▼
+┌─────────────────────────────────────┐
+│  Giao diện checkbox (gum)           │
+│                                     │
+│  ◉ Homebrew                         │
+│  ◉ Claude Code                      │
+│  ◉ Node.js                          │
+│  ◉ Oh My Zsh                        │
+│  ◉ iTerm2                           │
+│  ◉ ...                              │
+│                                     │
+│  Space = toggle  ·  Enter = cài     │
+└─────────────────────────────────────┘
+     │
+     ▼
+  Cài từng tool đã chọn theo thứ tự
+```
+
+Nếu chạy lại lần 2: script tự `git pull` để lấy version mới nhất, rồi tiếp tục.
+
+---
+
+## Yêu cầu
+
+| | |
+|---|---|
+| **Hệ điều hành** | macOS 12 Monterey trở lên |
+| **Kiến trúc** | Apple Silicon (M1/M2/M3/M4) và Intel |
+| **Kết nối** | Internet |
+| **Cài trước** | Không cần gì — script tự lo hết |
+
+---
+
+## Công cụ được hỗ trợ
+
+| # | Công cụ | Mô tả | Cài qua |
+|---|---------|-------|---------|
+| 1 | **Homebrew** | Package manager cho macOS | curl |
+| 2 | **Claude Code** | AI coding CLI của Anthropic | npm |
+| 3 | **Node.js** | JavaScript runtime + npm | Homebrew |
+| 4 | **Oh My Zsh** | Framework quản lý cấu hình zsh | curl |
+| 5 | **iTerm2** | Terminal thay thế Terminal.app | Homebrew Cask |
+| 6 | **Google Chrome** | Trình duyệt web | Homebrew Cask |
+| 7 | **Lark** | Công cụ cộng tác nhóm | Homebrew Cask |
+| 8 | **Zalo** | Nhắn tin (fallback: App Store) | Homebrew Cask |
+| 9 | **Claude Desktop** | App desktop của Anthropic | Homebrew Cask |
+| 10 | **pnpm** | Package manager nhanh cho Node | Homebrew |
+| 11 | **Docker** | Nền tảng container | Homebrew Cask |
+| 12 | **VS Code** | Trình soạn thảo code | Homebrew Cask |
+| 13 | **RustDesk** | Remote desktop | Homebrew Cask |
+| 14 | **Pasty** | Clipboard manager | Homebrew Cask |
+
+---
+
+## Cài thủ công (nếu đã có git)
 
 ```bash
 git clone https://gitlab.com/ginx-internal/infra/ginx-setup-macos.git
@@ -34,35 +94,34 @@ cd ginx-setup-macos
 ./install.sh
 ```
 
-## Tools Included
+---
 
-| # | Tool | Description | Install Method |
-|---|------|-------------|----------------|
-| 1 | Claude Code | Anthropic's AI CLI | npm |
-| 2 | Node.js | JavaScript runtime | Homebrew |
-| 3 | Oh My Zsh | Zsh framework | curl |
-| 4 | iTerm2 | Terminal emulator | Homebrew Cask |
-| 5 | Google Chrome | Web browser | Homebrew Cask |
-| 6 | Lark | Team collaboration | Homebrew Cask |
-| 7 | Zalo | Messaging app | Homebrew Cask |
-| 8 | Claude Desktop | AI desktop app | Homebrew Cask |
-| 9 | pnpm | Fast package manager | Homebrew |
-| 10 | Docker | Container platform | Homebrew Cask |
-| 11 | VS Code | Code editor | Homebrew Cask |
-| 12 | RustDesk | Remote desktop | Homebrew Cask |
-| 13 | Pasty | Clipboard manager | Homebrew Cask |
+## Cấu trúc project
 
-## How It Works
+```
+ginx-setup-macos/
+├── setup.sh          # Bootstrap — chạy qua curl, tự cài Homebrew + clone repo
+├── install.sh        # Installer chính — giao diện checkbox chọn tool
+├── lib/
+│   └── utils.sh      # Màu sắc, logging, helper functions
+└── scripts/
+    ├── homebrew.sh
+    ├── claude_code.sh
+    ├── nodejs.sh
+    └── ...           # 1 file/tool
+```
 
-When you run `./install.sh`, the script:
+---
 
-1. Checks for Homebrew and installs it automatically if missing.
-2. Installs `gum` to power the interactive terminal UI.
-3. Presents a checkbox list of all available tools — all pre-selected by default.
-4. You navigate with arrow keys, toggle selections with Space, and confirm with Enter.
-5. Only the tools you selected are installed, in order, using the appropriate method for each.
+## Tùy chỉnh thư mục cài
 
-This makes it easy to get a full dev environment in one go, or hand-pick just the tools you need.
+Mặc định repo clone về `~/.ginx-setup-macos`. Đổi bằng biến môi trường:
+
+```bash
+GINX_SETUP_DIR=~/my-setup /bin/bash -c "$(curl -fsSL https://YOUR_DOMAIN/setup.sh)"
+```
+
+---
 
 ## License
 
