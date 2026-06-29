@@ -20,7 +20,7 @@ fi
 # Install via npm if available, else brew
 if is_cmd npm; then
   log_info "Installing Cloudflare Wrangler via npm..."
-  npm install -g wrangler
+  npm install -g --allow-scripts=esbuild,workerd,sharp wrangler
   log_success "Cloudflare Wrangler installed ($(wrangler --version 2>/dev/null | head -1))"
 else
   log_info "Installing Cloudflare Wrangler via Homebrew..."

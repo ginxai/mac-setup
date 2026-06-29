@@ -58,9 +58,9 @@ install_cask() {
   local name="${2:-$1}"
   if is_cask "$cask"; then
     local ver; ver=$(_cask_version "$cask")
-    if brew outdated --cask --quiet 2>/dev/null | grep -qx "$cask"; then
+    if HOMEBREW_NO_AUTO_UPDATE=1 brew outdated --cask --quiet 2>/dev/null | grep -qx "$cask"; then
       log_info "$name v$ver → update available, upgrading..."
-      brew upgrade --cask "$cask" && log_success "$name updated" || log_warn "Could not update $name"
+      HOMEBREW_NO_AUTO_UPDATE=1 brew upgrade --cask "$cask" 2>/dev/null && log_success "$name updated" || log_warn "Could not update $name"
     else
       log_success "$name already installed (v$ver, up to date)"
     fi
@@ -75,9 +75,9 @@ install_formula() {
   local name="${2:-$1}"
   if brew list "$formula" &>/dev/null 2>&1; then
     local ver; ver=$(_formula_version "$formula")
-    if brew outdated --formula --quiet 2>/dev/null | grep -qx "$formula"; then
+    if HOMEBREW_NO_AUTO_UPDATE=1 brew outdated --formula --quiet 2>/dev/null | grep -qx "$formula"; then
       log_info "$name v$ver → update available, upgrading..."
-      brew upgrade "$formula" && log_success "$name updated" || log_warn "Could not update $name"
+      HOMEBREW_NO_AUTO_UPDATE=1 brew upgrade "$formula" 2>/dev/null && log_success "$name updated" || log_warn "Could not update $name"
     else
       log_success "$name already installed (v$ver, up to date)"
     fi

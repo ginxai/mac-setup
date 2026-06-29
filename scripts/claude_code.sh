@@ -17,7 +17,7 @@ if ! command -v node &>/dev/null || ! command -v npm &>/dev/null; then
 fi
 
 log_info "Installing Claude Code via npm..."
-if ! npm install -g @anthropic-ai/claude-code; then
+if ! npm install -g --allow-scripts=@anthropic-ai/claude-code @anthropic-ai/claude-code; then
     log_error "Failed to install @anthropic-ai/claude-code"
     exit 1
 fi
