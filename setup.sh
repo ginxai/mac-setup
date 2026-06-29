@@ -48,8 +48,13 @@ else
   success "Homebrew already installed"
 fi
 
-# ── Clone or update repo ──────────────────────────────────────────────────────
-if [[ -d "$INSTALL_DIR/.git" ]]; then
+# ── Resolve installer location ────────────────────────────────────────────────
+# If setup.sh is being run from inside the repo already, use it directly
+SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "$SELF_DIR/install.sh" ]]; then
+  INSTALL_DIR="$SELF_DIR"
+  success "Running from local repo: $INSTALL_DIR"
+elif [[ -d "$INSTALL_DIR/.git" ]]; then
   info "Updating ginx-setup-macos..."
   git -C "$INSTALL_DIR" pull --ff-only --quiet
   success "Updated to latest version"
