@@ -35,11 +35,23 @@ is_cmd() { command -v "$1" &>/dev/null; }
 
 is_cask() { brew list --cask "$1" &>/dev/null 2>&1; }
 
+# Get installed version of a cask
+_cask_version() { brew list --cask --versions "$1" 2>/dev/null | awk '{print $2}'; }
+
+# Get installed version of a formula
+_formula_version() { brew list --versions "$1" 2>/dev/null | awk '{print $2}'; }
+
 install_cask() {
   local cask="$1"
   local name="${2:-$1}"
   if is_cask "$cask"; then
-    log_success "$name already installed"
+    local ver; ver=$(_cask_version "$cask")
+    if brew outdated --cask --quiet 2>/dev/null | grep -qx "$cask"; then
+      log_info "$name v$ver → update available, upgrading..."
+      brew upgrade --cask "$cask" && log_success "$name updated" || log_warn "Could not update $name"
+    else
+      log_success "$name already installed (v$ver, up to date)"
+    fi
   else
     log_info "Installing $name..."
     brew install --cask "$cask" && log_success "$name installed" || log_error "Failed to install $name"
@@ -50,7 +62,13 @@ install_formula() {
   local formula="$1"
   local name="${2:-$1}"
   if brew list "$formula" &>/dev/null 2>&1; then
-    log_success "$name already installed"
+    local ver; ver=$(_formula_version "$formula")
+    if brew outdated --formula --quiet 2>/dev/null | grep -qx "$formula"; then
+      log_info "$name v$ver → update available, upgrading..."
+      brew upgrade "$formula" && log_success "$name updated" || log_warn "Could not update $name"
+    else
+      log_success "$name already installed (v$ver, up to date)"
+    fi
   else
     log_info "Installing $name..."
     brew install "$formula" && log_success "$name installed" || log_error "Failed to install $name"

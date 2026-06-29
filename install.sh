@@ -19,8 +19,8 @@ fi
 # ── Tool definitions: "script_id:Display Name" ────────────────────────────────
 TOOLS=(
   "homebrew:Homebrew"
-  "claude_code:Claude Code"
   "nodejs:Node.js"
+  "claude_code:Claude Code"
   "ohmyzsh:Oh My Zsh"
   "iterm:iTerm2"
   "chrome:Google Chrome"
@@ -31,7 +31,7 @@ TOOLS=(
   "docker:Docker"
   "vscode:VS Code"
   "rustdesk:RustDesk"
-  "pasty:Pasty"
+  "pasty:Paste"
 )
 
 LABELS=()
