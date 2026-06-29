@@ -31,7 +31,9 @@ TOOLS=(
   "docker:Docker"
   "vscode:VS Code"
   "rustdesk:RustDesk"
-  "pasty:Paste"
+  "gh:GitHub CLI"
+  "cloudflare:Cloudflare CLI"
+  "pasty:Pasty"
 )
 
 LABELS=()
