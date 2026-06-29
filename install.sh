@@ -7,7 +7,7 @@ source "$SCRIPT_DIR/lib/utils.sh"
 
 print_header "🍎  ginx macOS Setup"
 
-# ── Homebrew (required before gum/everything else) ────────────────────────────
+# ── Homebrew ──────────────────────────────────────────────────────────────────
 ensure_brew
 
 # ── gum (interactive TUI) ─────────────────────────────────────────────────────
@@ -36,33 +36,47 @@ TOOLS=(
   "pasty:Pasty"
 )
 
+# Build label arrays with STT prefix for display
 LABELS=()
-for t in "${TOOLS[@]}"; do LABELS+=("${t#*:}"); done
+DISPLAY=()
+for i in "${!TOOLS[@]}"; do
+  label="${TOOLS[$i]#*:}"
+  LABELS+=("$label")
+  DISPLAY+=("$(printf '%2d. %s' "$((i + 1))" "$label")")
+done
 
-# ── Interactive selection (all pre-selected by default) ───────────────────────
+# Pre-select string for gum (display names, comma-separated)
+PRESELECT="$(IFS=,; echo "${DISPLAY[*]}")"
+
+# ── Interactive selection ──────────────────────────────────────────────────────
 echo ""
-SELECTED=$(printf '%s\n' "${LABELS[@]}" | gum choose \
+SELECTED=$(gum choose \
   --no-limit \
-  --selected="$(IFS=,; echo "${LABELS[*]}")" \
-  --header "  Select tools to install  (Space = toggle · Enter = confirm)" \
+  --selected="$PRESELECT" \
+  --header "  Select tools to install  (Space = toggle · Enter = confirm)  " \
   --cursor.foreground="212" \
-  --selected.foreground="212") || true
+  --selected.foreground="212" \
+  "${DISPLAY[@]}") || true
 
 if [[ -z "$SELECTED" ]]; then
   log_warn "No tools selected. Exiting."
   exit 0
 fi
 
+TOTAL=$(echo "$SELECTED" | wc -l | tr -d ' ')
 echo ""
-log_info "Installing selected tools..."
+log_info "Installing $TOTAL tool(s)..."
 
-# ── Run install scripts for selected tools ────────────────────────────────────
+# ── Run install scripts ────────────────────────────────────────────────────────
 FAILED=()
-for tool in "${TOOLS[@]}"; do
-  id="${tool%%:*}"
-  label="${tool#*:}"
-  if echo "$SELECTED" | grep -qxF "$label"; then
-    log_step "$label"
+CURRENT=0
+for i in "${!TOOLS[@]}"; do
+  id="${TOOLS[$i]%%:*}"
+  label="${TOOLS[$i]#*:}"
+  display="${DISPLAY[$i]}"
+  if echo "$SELECTED" | grep -qxF "$display"; then
+    ((CURRENT++)) || true
+    log_step "[$CURRENT/$TOTAL] $label"
     if bash "$SCRIPT_DIR/scripts/${id}.sh"; then
       :
     else
@@ -71,9 +85,11 @@ for tool in "${TOOLS[@]}"; do
   fi
 done
 
+# ── Summary ───────────────────────────────────────────────────────────────────
 echo ""
+PASSED=$((TOTAL - ${#FAILED[@]}))
 if [[ ${#FAILED[@]} -eq 0 ]]; then
-  log_success "✅  All done! Open a new terminal to apply any shell changes."
+  log_success "✅  Done! $PASSED/$TOTAL installed. Open a new terminal to apply shell changes."
 else
-  log_warn "Completed with errors in: ${FAILED[*]}"
+  log_warn "$PASSED/$TOTAL installed. Failed: ${FAILED[*]}"
 fi

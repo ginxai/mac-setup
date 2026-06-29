@@ -16,19 +16,31 @@ log_warn()    { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error()   { echo -e "${RED}[ERR ]${NC} $1" >&2; }
 log_step()    { echo -e "\n${BOLD}${GREEN}▶ $1${NC}"; }
 
-ensure_brew() {
-  if ! command -v brew &>/dev/null; then
-    log_info "Installing Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    # Add brew to PATH — Apple Silicon (/opt/homebrew) or Intel (/usr/local)
-    if [[ -f /opt/homebrew/bin/brew ]]; then
-      eval "$(/opt/homebrew/bin/brew shellenv)"
-    elif [[ -f /usr/local/bin/brew ]]; then
-      eval "$(/usr/local/bin/brew shellenv)"
-    fi
-  else
-    log_success "Homebrew already installed ($(brew --version | head -1))"
+_brew_add_to_path() {
+  if [[ -f /opt/homebrew/bin/brew ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  elif [[ -f /usr/local/bin/brew ]]; then
+    eval "$(/usr/local/bin/brew shellenv)"
   fi
+}
+
+ensure_brew() {
+  # Already in PATH
+  if command -v brew &>/dev/null; then
+    log_success "Homebrew already installed ($(brew --version | head -1))"
+    return
+  fi
+  # Installed but not in PATH yet (e.g. new terminal session)
+  if [[ -f /opt/homebrew/bin/brew || -f /usr/local/bin/brew ]]; then
+    _brew_add_to_path
+    log_success "Homebrew already installed ($(brew --version | head -1))"
+    return
+  fi
+  # Not installed — run installer
+  log_info "Installing Homebrew..."
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  _brew_add_to_path
+  log_success "Homebrew installed ($(brew --version | head -1))"
 }
 
 is_cmd() { command -v "$1" &>/dev/null; }
