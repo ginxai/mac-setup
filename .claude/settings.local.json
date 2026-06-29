@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/ginx/**)",
+      "Read(//Users/ginx/.ssh/**)",
+      "Bash(ssh-keygen *)",
+      "Bash(git -C /Users/ginx/Workspace status)"
+    ]
+  }
+}
