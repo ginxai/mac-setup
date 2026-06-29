@@ -10,6 +10,4 @@ if [ -d "/Applications/iTerm.app" ]; then
 fi
 
 brew install --cask iterm2
-
-ls /Applications/iTerm.app
 log_success "iTerm2 installed successfully."

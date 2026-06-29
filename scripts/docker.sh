@@ -13,5 +13,4 @@ brew install --cask docker
 
 log_success "Docker installed successfully."
 log_info "Open Docker.app to complete setup."
-
-open /Applications/Docker.app
+open /Applications/Docker.app 2>/dev/null || true
