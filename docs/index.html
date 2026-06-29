@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mac-setup — Set up a new Mac in minutes</title>
+  <meta name="description" content="One command to set up your entire Mac dev environment. Interactive CLI with 16 tools, all pre-selected." />
+  <meta property="og:title" content="mac-setup" />
+  <meta property="og:description" content="Set up a new Mac in minutes, not hours." />
+  <meta property="og:url" content="https://ginxai.github.io/mac-setup" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --bg2: #161b22;
+      --bg3: #1c2128;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --green: #3fb950;
+      --cyan: #79c0ff;
+      --purple: #d2a8ff;
+      --orange: #ffa657;
+      --red: #ff7b72;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+    }
+
+    a { color: var(--cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Nav ── */
+    nav {
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
+    }
+    .nav-logo { font-weight: 700; font-size: 1.1rem; color: var(--text); }
+    .nav-logo span { color: var(--green); }
+    .nav-links { display: flex; gap: 20px; font-size: 0.9rem; color: var(--muted); }
+    .nav-links a { color: var(--muted); }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 80px 24px 60px;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    .badge-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+    .badge {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-family: 'SF Mono', monospace;
+    }
+    .badge.green { color: var(--green); border-color: #238636; }
+    .badge.cyan { color: var(--cyan); border-color: #1f6feb; }
+
+    h1 {
+      font-size: clamp(2.4rem, 6vw, 3.6rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    h1 .apple { color: var(--text); }
+    h1 em { font-style: normal; color: var(--green); }
+
+    .hero-sub {
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto 40px;
+    }
+
+    /* ── Command box ── */
+    .cmd-box {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      max-width: 640px;
+      margin: 0 auto 16px;
+      text-align: left;
+    }
+    .cmd-prompt { color: var(--green); font-family: 'SF Mono', monospace; font-size: 0.9rem; flex-shrink: 0; }
+    .cmd-text {
+      font-family: 'SF Mono', monospace;
+      font-size: 0.88rem;
+      color: var(--cyan);
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .copy-btn {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .copy-btn:hover { background: var(--border); color: var(--text); }
+    .copy-btn.copied { color: var(--green); border-color: #238636; }
+
+    .hero-note { font-size: 0.82rem; color: var(--muted); }
+
+    /* ── Terminal demo ── */
+    .terminal-wrap {
+      max-width: 760px;
+      margin: 48px auto;
+      padding: 0 24px;
+    }
+    .terminal {
+      background: #010409;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+    }
+    .terminal-bar {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot.red { background: #ff5f57; }
+    .dot.yellow { background: #febc2e; }
+    .dot.green { background: #28c840; }
+    .terminal-title { flex: 1; text-align: center; font-size: 0.78rem; color: var(--muted); font-family: 'SF Mono', monospace; }
+    .terminal-body { padding: 20px 24px; font-family: 'SF Mono', monospace; font-size: 0.82rem; line-height: 1.8; }
+    .t-ok     { color: #3fb950; }
+    .t-info   { color: #79c0ff; }
+    .t-warn   { color: #d29922; }
+    .t-step   { color: #3fb950; font-weight: bold; }
+    .t-muted  { color: #484f58; }
+    .t-prompt { color: #3fb950; }
+    .t-cmd    { color: var(--text); }
+    .t-check  { color: #3fb950; }
+    .t-label  { color: #d2a8ff; }
+
+    /* ── Features ── */
+    .section {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 24px;
+    }
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 28px;
+      color: var(--text);
+    }
+    .section-title span { color: var(--green); }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .feature {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      transition: border-color 0.2s;
+    }
+    .feature:hover { border-color: #388bfd; }
+    .feature-icon { font-size: 1.5rem; margin-bottom: 10px; }
+    .feature h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 6px; }
+    .feature p { font-size: 0.85rem; color: var(--muted); }
+
+    /* ── Tools grid ── */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .tool {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: border-color 0.2s;
+    }
+    .tool:hover { border-color: #388bfd; }
+    .tool-icon { font-size: 1.2rem; width: 28px; text-align: center; flex-shrink: 0; }
+    .tool-info { overflow: hidden; }
+    .tool-name { font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tool-via { font-size: 0.75rem; color: var(--muted); }
+
+    /* ── CTA ── */
+    .cta {
+      text-align: center;
+      padding: 64px 24px;
+      border-top: 1px solid var(--border);
+    }
+    .cta h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
+    .cta p { color: var(--muted); margin-bottom: 28px; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #238636;
+      color: #fff;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #2ea043; text-decoration: none; }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      margin-left: 12px;
+    }
+    .btn-outline:hover { background: var(--bg2); }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 20px 24px;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-logo">🍎 <span>mac</span>-setup</div>
+  <div class="nav-links">
+    <a href="#tools">Tools</a>
+    <a href="https://github.com/ginxai/mac-setup" target="_blank">GitHub ↗</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="badge-row">
+    <span class="badge green">macOS 12+</span>
+    <span class="badge cyan">Apple Silicon</span>
+    <span class="badge cyan">Intel</span>
+    <span class="badge">MIT License</span>
+    <span class="badge">16 tools</span>
+  </div>
+
+  <h1>
+    <span class="apple">Set up a new Mac</span><br/>
+    <em>in minutes, not hours.</em>
+  </h1>
+
+  <p class="hero-sub">
+    One command. Interactive checklist. Everything a developer needs — all pre-selected by default.
+  </p>
+
+  <div class="cmd-box">
+    <span class="cmd-prompt">$</span>
+    <span class="cmd-text" id="cmd">/bin/bash -c "$(curl -fsSL https://ginxai.github.io/mac-setup/setup.sh)"</span>
+    <button class="copy-btn" id="copyBtn" onclick="copyCmd()">Copy</button>
+  </div>
+  <p class="hero-note">Works on a brand-new Mac — no git, no Homebrew required.</p>
+</section>
+
+<!-- Terminal demo -->
+<div class="terminal-wrap">
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="dot red"></div>
+      <div class="dot yellow"></div>
+      <div class="dot green"></div>
+      <div class="terminal-title">zsh — mac-setup</div>
+    </div>
+    <div class="terminal-body">
+      <div><span class="t-prompt">$</span> <span class="t-cmd">bash install.sh</span></div>
+      <div>&nbsp;</div>
+      <div><span class="t-step">🍎  ginx macOS Setup</span></div>
+      <div>&nbsp;</div>
+      <div><span class="t-ok">[ OK ]</span> Homebrew already installed (Homebrew 4.x)</div>
+      <div>&nbsp;</div>
+      <div class="t-muted">  Select tools to install  (Space = toggle · Enter = confirm)</div>
+      <div>&nbsp;</div>
+      <div><span class="t-check">❯ ✓</span>  <span class="t-label"> 1. Homebrew</span></div>
+      <div><span class="t-muted">  ✓</span>   2. Node.js</div>
+      <div><span class="t-muted">  ✓</span>   3. Claude Code</div>
+      <div><span class="t-muted">  ✓</span>   4. Oh My Zsh</div>
+      <div><span class="t-muted">  ✓</span>   5. iTerm2</div>
+      <div><span class="t-muted">  ✓</span>   6. Google Chrome</div>
+      <div><span class="t-muted">  ✓  ...</span></div>
+      <div>&nbsp;</div>
+      <div><span class="t-info">[INFO]</span> Installing 16 tool(s)...</div>
+      <div>&nbsp;</div>
+      <div><span class="t-step">▶ [1/16] Homebrew</span></div>
+      <div><span class="t-ok">[ OK ]</span> Homebrew already installed (v4.x, up to date)</div>
+      <div><span class="t-step">▶ [2/16] Node.js</span></div>
+      <div><span class="t-ok">[ OK ]</span> Node.js installed — node v22.x, npm v10.x</div>
+      <div><span class="t-muted">  ...</span></div>
+      <div>&nbsp;</div>
+      <div><span class="t-ok">[ OK ]</span> ✅  Done! 16/16 installed.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Features -->
+<section class="section">
+  <div class="section-title">Why <span>mac-setup</span>?</div>
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">⚡️</div>
+      <h3>One command</h3>
+      <p>Paste and go — works on a brand-new Mac with nothing installed. Homebrew, git, everything is bootstrapped automatically.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">☑️</div>
+      <h3>Interactive checklist</h3>
+      <p>All 16 tools are pre-selected. Confirm with Enter to install everything, or toggle what you don't need.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔄</div>
+      <h3>Safe to re-run</h3>
+      <p>Already installed? Skipped. Outdated? Auto-upgraded. No duplicate downloads, no wasted bandwidth.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">💻</div>
+      <h3>Apple Silicon & Intel</h3>
+      <p>Detects your architecture automatically. Works on M1/M2/M3/M4 and all Intel Macs.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">✨</div>
+      <h3>Beautiful terminal</h3>
+      <p>Configures Oh My Zsh with Powerlevel10k, autosuggestions, syntax highlighting, and Nerd Font — zero config needed.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔓</div>
+      <h3>Open source</h3>
+      <p>One script per tool. Easy to read, fork, and extend with your own tools.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- Tools -->
+<section class="section" id="tools">
+  <div class="section-title">16 <span>Tools</span> included</div>
+  <div class="tools-grid">
+    <div class="tool"><div class="tool-icon">🍺</div><div class="tool-info"><div class="tool-name">Homebrew</div><div class="tool-via">curl</div></div></div>
+    <div class="tool"><div class="tool-icon">⬡</div><div class="tool-info"><div class="tool-name">Node.js</div><div class="tool-via">Homebrew</div></div></div>
+    <div class="tool"><div class="tool-icon">🤖</div><div class="tool-info"><div class="tool-name">Claude Code</div><div class="tool-via">npm</div></div></div>
+    <div class="tool"><div class="tool-icon">💤</div><div class="tool-info"><div class="tool-name">Oh My Zsh</div><div class="tool-via">curl + p10k</div></div></div>
+    <div class="tool"><div class="tool-icon">🖥</div><div class="tool-info"><div class="tool-name">iTerm2</div><div class="tool-via">Homebrew Cask</div></div></div>
+    <div class="tool"><div class="tool-icon">🌐</div><div class="tool-info"><div class="tool-name">Google Chrome</div><div class="tool-via">Homebrew Cask</div></div></div>
+    <div class="tool"><div class="tool-icon">🐦</div><div class="tool-info"><div class="tool-name">Lark</div><div class="tool-via">Homebrew Cask</div></div></div>
+    <div class="tool"><div class="tool-icon">💬</div><div class="tool-info"><div class="tool-name">Zalo</div><div class="tool-via">Homebrew Cask</div></div></div>
+    <div class="tool"><div class="tool-icon">🧠</div><div class="tool-info"><div class="tool-name">Claude Desktop</div><div class="tool-via">Homebrew Cask</div></div></div>
+    <div class="tool"><div class="tool-icon">📦</div><div class="tool-info"><div class="tool-name">pnpm</div><div class="tool-via">Homebrew</div></div></div>
+    <div class="tool"><div class="tool-icon">🐳</div><div class="tool-info"><div class="tool-name">Docker</div><div class="tool-via">Homebrew Cask</div></div></div>
+    <div class="tool"><div class="tool-icon">💻</div><div class="tool-info"><div class="tool-name">VS Code</div><div class="tool-via">Homebrew Cask</div></div></div>
+    <div class="tool"><div class="tool-icon">🖥</div><div class="tool-info"><div class="tool-name">RustDesk</div><div class="tool-via">Homebrew Cask</div></div></div>
+    <div class="tool"><div class="tool-icon">🐙</div><div class="tool-info"><div class="tool-name">GitHub CLI</div><div class="tool-via">Homebrew</div></div></div>
+    <div class="tool"><div class="tool-icon">☁️</div><div class="tool-info"><div class="tool-name">Cloudflare CLI</div><div class="tool-via">npm</div></div></div>
+    <div class="tool"><div class="tool-icon">📋</div><div class="tool-info"><div class="tool-name">Pasty</div><div class="tool-via">Mac App Store</div></div></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta">
+  <h2>Ready to set up your Mac?</h2>
+  <p>Takes about 10–15 minutes depending on your internet speed.</p>
+  <a class="btn" href="https://github.com/ginxai/mac-setup" target="_blank">
+    ⭐ Star on GitHub
+  </a>
+  <a class="btn btn-outline" href="https://github.com/ginxai/mac-setup" target="_blank">
+    View source
+  </a>
+</div>
+
+<!-- Footer -->
+<footer>
+  Built by <a href="https://github.com/ginxai" target="_blank">ginxai</a> · MIT License ·
+  <a href="https://github.com/ginxai/mac-setup" target="_blank">GitHub</a>
+</footer>
+
+<script>
+  function copyCmd() {
+    const text = document.getElementById('cmd').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
